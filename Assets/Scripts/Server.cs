@@ -11,6 +11,22 @@ public class Server : MonoBehaviour
     PlayerData playerData;
     bool clientConnected = false;
 
+    public static Server instance;
+    GameObject instantiatedGameObject;
+
+    void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     void Start()
     {
         playerData = new PlayerData("SERVER_ID", "SERVER");
@@ -55,19 +71,22 @@ public class Server : MonoBehaviour
 
                 if (Input.GetKeyDown(KeyCode.W))
                 {
-                    InstantiatePacket ip = new InstantiatePacket(
+                    SceneManager.SetActiveScene(SceneManager.GetSceneByName("Server"));
+                    instantiatedGameObject = Utils.InstantiateOverNetwork(
+                        client,
                         playerData,
                         "Player/Prefab/Player",
                         new Vector3(5, 4, -9),
                         Quaternion.Euler(45, 0, 0));
+                }
 
-                    client.Send(ip.Serialize());
-
-                    Debug.LogError($"[Server] Sent Instantiate Packet to client with player ID of {ip.playerData.ID}");
-                    Debug.LogError($"[Server] And player Name of {ip.playerData.Name}");
-                    Debug.LogError($"[Server] And prefabName of {ip.PrefabName}");
-                    Debug.LogError($"[Server] And position of {ip.Position}");
-                    Debug.LogError($"[Server] And rotation of {ip.Rotation.eulerAngles}");
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    SceneManager.SetActiveScene(SceneManager.GetSceneByName("Server"));
+                    Utils.DestoryOverNetwork(
+                        client,
+                        playerData,
+                        instantiatedGameObject);
                 }
             }
             catch (SocketException ex)

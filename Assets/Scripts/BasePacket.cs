@@ -12,7 +12,8 @@ public class BasePacket
         Unknown = -1,
         None,
         Position,
-        Instantiate
+        Instantiate,
+        Destroy
     }
 
     public PacketType packetType { get; private set; }

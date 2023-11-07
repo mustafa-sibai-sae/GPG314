@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using UnityEditor.SearchService;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Client : MonoBehaviour
 {
@@ -9,6 +11,21 @@ public class Client : MonoBehaviour
     [SerializeField] ushort port;
     Socket client;
     bool clientConnected = false;
+
+    public static Client instance;
+
+    void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {
@@ -47,12 +64,24 @@ public class Client : MonoBehaviour
 
                         case BasePacket.PacketType.Instantiate:
 
+                            SceneManager.SetActiveScene(SceneManager.GetSceneByName("Client"));
                             InstantiatePacket ip = new InstantiatePacket().Deserialize(buffer);
                             Debug.LogWarning($"[Client] Instantiate Packet Content is: {ip.PrefabName}");
                             Debug.LogWarning($"[Client] Instantiate Packet Content is: {ip.Position}");
                             Debug.LogWarning($"[Client] Instantiate Packet Content is: {ip.Rotation.eulerAngles}");
 
-                            CustomInstantiate.Instantiate(ip.PrefabName, ip.Position, ip.Rotation);
+                            GameObject go = Utils.InstantiateFromNetwork(ip);
+
+                            break;
+
+
+                        case BasePacket.PacketType.Destroy:
+
+                            SceneManager.SetActiveScene(SceneManager.GetSceneByName("Client"));
+                            DestroyPacket dp = new DestroyPacket().Deserialize(buffer);
+                            Debug.LogWarning($"[Client] Destroy Packet Content is: {dp.GameObjectID}");
+                            Utils.DestroyFromNetwork(dp);
+
                             break;
                     }
                 }
