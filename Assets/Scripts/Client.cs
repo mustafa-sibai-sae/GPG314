@@ -23,19 +23,35 @@ public class Client : MonoBehaviour
     {
         if (clientConnected)
         {
-            try
+            if (client.Available > 0)
             {
-                byte[] buffer = new byte[1024];
-                client.Receive(buffer);
-
-                Debug.LogWarning("Received a message from the server!");
-                Debug.LogWarning($"[Client] {Encoding.ASCII.GetString(buffer)}");
-            }
-            catch (SocketException ex)
-            {
-                if (ex.SocketErrorCode != SocketError.WouldBlock)
+                try
                 {
-                    Debug.LogWarning($"[Client] {ex}");
+                    byte[] buffer = new byte[client.Available];
+                    client.Receive(buffer);
+
+                    BasePacket bp = new BasePacket();
+                    bp.Deserialize(buffer);
+
+                    Debug.LogWarning($"[Client] Received a packet from the server");
+                    Debug.LogWarning($"[Client] Packet Type is {bp.packetType}");
+                    Debug.LogWarning($"[Client] Player ID of {bp.playerData.ID} and player name of {bp.playerData.Name}");
+
+                    switch (bp.packetType)
+                    {
+                        case BasePacket.PacketType.Position:
+
+                            PositionPacket pp = new PositionPacket().Deserialize(buffer);
+                            Debug.LogWarning($"[Client] Position Packet Content is: {pp.Position}");
+                            break;
+                    }
+                }
+                catch (SocketException ex)
+                {
+                    if (ex.SocketErrorCode != SocketError.WouldBlock)
+                    {
+                        Debug.LogWarning($"[Client] {ex}");
+                    }
                 }
             }
         }

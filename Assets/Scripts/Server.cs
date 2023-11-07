@@ -9,10 +9,13 @@ public class Server : MonoBehaviour
     [SerializeField] ushort port;
     Socket serverSocket;
     Socket client;
+    PlayerData playerData;
     bool clientConnected = false;
 
     void Start()
     {
+        playerData = new PlayerData("SERVER_ID", "SERVER");
+
         serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         serverSocket.Bind(new IPEndPoint(IPAddress.Any, port));
         serverSocket.Listen(10);
@@ -41,8 +44,12 @@ public class Server : MonoBehaviour
         {
             try
             {
-                client.Send(Encoding.ASCII.GetBytes("Hello World! I am the server!"));
-                Debug.LogError("[Server] Sent message to client!");
+                PositionPacket ps = new PositionPacket(playerData, new Vector3(1, 2, 3));
+                client.Send(ps.Serialize());
+
+                Debug.LogError($"[Server] Sent Position Packet to client with player ID of {ps.playerData.ID}");
+                Debug.LogError($"[Server] And player Name of {ps.playerData.Name}");
+                Debug.LogError($"[Server] And position of {ps.Position}");
             }
             catch (SocketException ex)
             {
