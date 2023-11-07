@@ -44,6 +44,16 @@ public class Client : MonoBehaviour
                             PositionPacket pp = new PositionPacket().Deserialize(buffer);
                             Debug.LogWarning($"[Client] Position Packet Content is: {pp.Position}");
                             break;
+
+                        case BasePacket.PacketType.Instantiate:
+
+                            InstantiatePacket ip = new InstantiatePacket().Deserialize(buffer);
+                            Debug.LogWarning($"[Client] Instantiate Packet Content is: {ip.PrefabName}");
+                            Debug.LogWarning($"[Client] Instantiate Packet Content is: {ip.Position}");
+                            Debug.LogWarning($"[Client] Instantiate Packet Content is: {ip.Rotation.eulerAngles}");
+
+                            CustomInstantiate.Instantiate(ip.PrefabName, ip.Position, ip.Rotation);
+                            break;
                     }
                 }
                 catch (SocketException ex)
