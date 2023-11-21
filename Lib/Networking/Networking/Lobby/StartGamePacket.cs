@@ -11,9 +11,11 @@
         {
         }
 
-        public new byte[] Serialize()
+        public byte[] Serialize()
         {
-            base.Serialize();
+            BeginSerialize();
+
+            EndSerialize();
 
             return serializeMemoryStream.ToArray();
         }

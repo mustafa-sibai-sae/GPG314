@@ -18,9 +18,9 @@ namespace Networking.Lobby
             LobbyPlayerData = lobbyPlayerData;
         }
 
-        public new byte[] Serialize()
+        public byte[] Serialize()
         {
-            base.Serialize();
+            BeginSerialize();
 
             binaryWriter.Write(LobbyPlayerData.Count);
 
@@ -31,6 +31,8 @@ namespace Networking.Lobby
                 binaryWriter.Write(LobbyPlayerData[i].IsHost);
                 binaryWriter.Write(LobbyPlayerData[i].IsReady);
             }
+
+            EndSerialize();
 
             return serializeMemoryStream.ToArray();
         }

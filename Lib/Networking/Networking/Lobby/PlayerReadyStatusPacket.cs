@@ -15,11 +15,13 @@
             IsPlayerRead = isPlayerRead;
         }
 
-        public new byte[] Serialize()
+        public byte[] Serialize()
         {
-            base.Serialize();
+            BeginSerialize();
 
             binaryWriter.Write(IsPlayerRead);
+
+            EndSerialize();
 
             return serializeMemoryStream.ToArray();
         }

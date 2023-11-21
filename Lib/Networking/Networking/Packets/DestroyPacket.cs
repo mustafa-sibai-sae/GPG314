@@ -16,11 +16,13 @@ namespace Networking
             GameObjectID = gameObjectID;
         }
 
-        public new byte[] Serialize()
+        public byte[] Serialize()
         {
-            base.Serialize();
+            BeginSerialize();
 
             binaryWriter.Write(GameObjectID);
+
+            EndSerialize();
 
             return serializeMemoryStream.ToArray();
         }

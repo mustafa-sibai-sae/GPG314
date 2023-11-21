@@ -20,11 +20,13 @@
         {
         }
 
-        public new byte[] Serialize()
+        public byte[] Serialize()
         {
-            base.Serialize();
+            BeginSerialize();
 
             binaryWriter.Write((int)PacketErrorCode);
+
+            EndSerialize();
 
             return serializeMemoryStream.ToArray();
         }

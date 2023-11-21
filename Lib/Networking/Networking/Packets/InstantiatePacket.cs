@@ -30,9 +30,9 @@ namespace Networking
             Rotation = rotation;
         }
 
-        public new byte[] Serialize()
+        public byte[] Serialize()
         {
-            base.Serialize();
+            BeginSerialize();
 
             binaryWriter.Write(GameObjectID);
 
@@ -46,6 +46,8 @@ namespace Networking
             binaryWriter.Write(Rotation.y);
             binaryWriter.Write(Rotation.z);
             binaryWriter.Write(Rotation.w);
+
+            EndSerialize();
 
             return serializeMemoryStream.ToArray();
         }

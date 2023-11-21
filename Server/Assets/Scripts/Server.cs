@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using Networking;
 using Networking.Lobby;
 using System.Linq;
+using System.Text;
+using Unity.VisualScripting;
 
 public class Server : MonoBehaviour
 {
@@ -65,141 +67,18 @@ public class Server : MonoBehaviour
         {
             for (int i = 0; i < clients.Count; i++)
             {
-                if (clients[i].Available > 0)
-                {
-                    try
-                    {
-                        byte[] buffer = new byte[clients[i].Available];
-                        clients[i].Receive(buffer);
+                clients[i].Send(new PositionPacket(
+                    PlayerInformation.Instance.PlayerData,
+                    new Vector3(1, 2, 3)).Serialize());
 
-                        BasePacket bp = new BasePacket();
-                        bp.Deserialize(buffer);
+                clients[i].Send(new PositionPacket(
+                    PlayerInformation.Instance.PlayerData,
+                    new Vector3(7, 8, 9)).Serialize());
 
-                        Debug.LogError($"[Server] Received a packet from the client");
-                        Debug.LogError($"[Server] Packet Type is {bp.packetType}");
-                        Debug.LogError($"[Server] Player ID of {bp.playerData.ID} and player name of {bp.playerData.Name}");
-
-                        switch (bp.packetType)
-                        {
-                            case BasePacket.PacketType.PlayerJoinedLobby:
-                                Debug.LogError($"[Server] Received a Player Joined Lobby Packet");
-
-                                PlayerJoinedLobbyPacket pjlp = new PlayerJoinedLobbyPacket().Deserialize(buffer);
-                                bool result = lobby.TryAddPlayerToLobby(pjlp.playerData);
-
-                                if (result)
-                                {
-                                    SendPacketsToAllClients(new LobbyInfoPacket(
-                                        PlayerInformation.Instance.PlayerData,
-                                        lobby.lobbyPlayerData).Serialize());
-                                }
-                                else
-                                {
-                                    //Send lobby full packet
-                                }
-
-                                break;
-
-                            case BasePacket.PacketType.StartGame:
-                                Debug.LogError($"[Server] Received a Start Game Packet");
-
-                                StartGamePacket sgp = new StartGamePacket().Deserialize(buffer);
-
-                                for (int j = 0; j < lobby.lobbyPlayerData.Count; j++)
-                                {
-                                    if (lobby.lobbyPlayerData[j].PlayerData.Name == sgp.playerData.Name)
-                                    {
-                                        if (lobby.lobbyPlayerData[j].IsHost)
-                                        {
-                                            bool allPlayersAreReady = true;
-
-                                            for (int k = 0; k < lobby.lobbyPlayerData.Count; k++)
-                                            {
-                                                if (!lobby.lobbyPlayerData[k].IsReady)
-                                                {
-                                                    allPlayersAreReady = false;
-                                                    break;
-                                                }
-                                            }
-
-                                            if (!allPlayersAreReady)
-                                            {
-                                                //Send failed to start game packet because not all players are ready
-                                            }
-                                            else
-                                            {
-                                                SendPacketsToAllClients(new StartGamePacket(
-                                                    PlayerInformation.Instance.PlayerData).Serialize());
-                                            }
-                                        }
-                                        else
-                                        {
-                                            //Send failed to start game packet because player starting game is not host
-                                        }
-                                        break;
-                                    }
-                                }
-                                break;
-
-                            case BasePacket.PacketType.PlayerReadyStatus:
-                                Debug.LogError($"[Server] Received Player Ready Status Packet");
-
-                                PlayerReadyStatusPacket prsp = new PlayerReadyStatusPacket().Deserialize(buffer);
-
-                                for (int j = 0; j < lobby.lobbyPlayerData.Count; j++)
-                                {
-                                    if (lobby.lobbyPlayerData[j].PlayerData.ID == prsp.playerData.ID)
-                                    {
-                                        lobby.lobbyPlayerData[j].IsReady = prsp.IsPlayerRead;
-                                        break;
-                                    }
-                                }
-
-                                SendPacketsToAllClients(new LobbyInfoPacket(
-                                    PlayerInformation.Instance.PlayerData,
-                                    lobby.lobbyPlayerData).Serialize());
-
-                                break;
-
-                                /*case BasePacket.PacketType.Position:
-
-                                    PositionPacket pp = new PositionPacket().Deserialize(buffer);
-                                    Debug.LogWarning($"[Client] Position Packet Content is: {pp.Position}");
-                                    break;*/
-
-                                /*case BasePacket.PacketType.Instantiate:
-
-                                    InstantiatePacket ip = new InstantiatePacket().Deserialize(buffer);
-                                    Debug.LogError($"[Server] Instantiate Packet Content is: {ip.PrefabName}");
-                                    Debug.LogError($"[Server] Instantiate Packet Content is: {ip.Position}");
-                                    Debug.LogError($"[Server] Instantiate Packet Content is: {ip.Rotation.eulerAngles}");
-
-                                    GameObject go = Utils.InstantiateFromNetwork(ip);
-                                    SendPacketsToAllOtherClients(i, buffer);
-
-                                    break;*/
-
-
-                                /*case BasePacket.PacketType.Destroy:
-
-                                    DestroyPacket dp = new DestroyPacket().Deserialize(buffer);
-                                    Debug.LogError($"[Server] Destroy Packet Content is: {dp.GameObjectID}");
-                                    Utils.DestroyFromNetwork(dp);
-                                    SendPacketsToAllOtherClients(i, buffer);
-
-                                    break;*/
-                        }
-                    }
-                    catch (SocketException ex)
-                    {
-                        if (ex.SocketErrorCode != SocketError.WouldBlock)
-                        {
-                            Debug.LogError($"[Server] {ex}");
-                        }
-                    }
-                }
+                clients[i].Send(new PositionPacket(
+                    PlayerInformation.Instance.PlayerData,
+                    new Vector3(20, 30, 40)).Serialize());
             }
-
         }
     }
 

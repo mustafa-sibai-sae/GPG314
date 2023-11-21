@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Networking
@@ -16,13 +17,15 @@ namespace Networking
             Position = position;
         }
 
-        public new byte[] Serialize()
+        public byte[] Serialize()
         {
-            base.Serialize();
+            BeginSerialize();
 
             binaryWriter.Write(Position.x);
             binaryWriter.Write(Position.y);
             binaryWriter.Write(Position.z);
+
+            EndSerialize();
 
             return serializeMemoryStream.ToArray();
         }
